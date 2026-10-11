@@ -100,9 +100,9 @@ if (cluster.isPrimary) {
   }));
 } else {
   const _run = (await import(`../engines/${engine}/run.js`)).default;
-  const run = ({ file, contents, flags, negative }) => {
+  const run = ({ file, sourcePath, contents, flags, negative }) => {
     // use tmp file in same dir as test for module resolution
-    const tmpFile = `test262/test/${file}.${engine}`;
+    const tmpFile = `${sourcePath ?? `test262/test/${file}`}.${engine}`;
     fs.writeFileSync(tmpFile, contents);
 
     const result = _run(tmpFile, flags.module, experimental);

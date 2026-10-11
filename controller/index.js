@@ -20,29 +20,24 @@ const engines = [
   'sm_exp',
   'qjs',
   'qjs_ng',
-  'hermes',
   'porffor',
   'boa',
   'libjs',
-  // 'engine262',
-  'xs',
-  'njs',
   'kiesel',
-  'nova'
+  'nova',
+  'kingfisher'
 ];
 
 let queue = process.argv[2]?.split(',').map(x => x.trim()).filter(x => x);
 if (queue == null || queue.length === 0) queue = engines;
 
-if (!process.env.GITHUB_TOKEN) throw new Error('GITHUB_TOKEN is required');
-
 if (queue.length === engines.length) fs.rmSync('results', { recursive: true, force: true });
 fs.rmSync('deploy', { recursive: true, force: true });
 
 // clone test262
-console.log('cloning test262...');
-fs.rmSync('test262', { recursive: true, force: true });
-$(`git clone https://github.com/tc39/test262.git --depth=1`);
+// console.log('cloning test262...');
+// fs.rmSync('test262', { recursive: true, force: true });
+// $(`git clone https://github.com/tc39/test262.git --depth=1 --verbose`);
 
 OOMKiller.start(workingDir);
 
@@ -68,8 +63,3 @@ try {
 }
 
 await generate();
-
-for (const file of fs.readdirSync(workingDir)) {
-  if (['results', 'deploy', 'test262'].includes(file)) continue;
-  fs.rmSync(file, { recursive: true, force: true });
-}

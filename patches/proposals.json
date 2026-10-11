@@ -1,0 +1,14 @@
+{
+  "bigint-math": {
+    "name": "BigInt Math",
+    "link": "https://github.com/tc39/proposal-bigint-math",
+    "stage": 1,
+    "description": ""
+  },
+  "math-clamp": {
+    "name": "Math.clamp",
+    "link": "https://github.com/tc39/proposal-math-clamp",
+    "stage": 2,
+    "description": ""
+  }
+}

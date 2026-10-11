@@ -32,6 +32,34 @@ Independent daily [test262](https://github.com/tc39/test262) (standard test suit
 - [X] JSC with experimental opts
 - [ ] Stable versions of engines
 
+## Local proposal patches
+
+Tests in `patches/` are included alongside test262. Add proposal metadata to
+`patches/proposals.json`, keyed by the feature used in the tests' `features` list:
+
+```json
+{
+  "my-proposal": {
+    "name": "My proposal",
+    "link": "https://example.com/my-proposal",
+    "stage": 1,
+    "description": "What the proposal adds."
+  }
+}
+```
+
+Tag matching tests with `features: [my-proposal]`. When the controller generates
+data, these entries appear in the index page's Proposals section with test totals
+and engine pass counts. Existing proposal metadata is merged with local overrides;
+new entries require `name`, `link`, and a numeric `stage` (including fractional
+stages). `description`, `stars`, and `lastUpdated` are optional. Local proposals
+are counted in the proposals/ESNext edition group.
+
+`FYI_PATCH_TESTS` selects a different patch directory for both tests and
+`proposals.json`; an empty value disables patches. The JSON file is optional.
+Run the controller again to execute new tests, or run `node controller/generate.js`
+to regenerate metadata using existing results.
+
 ## Features to do
 - Preview test262 PRs (changes only)
 - Data/graph over time

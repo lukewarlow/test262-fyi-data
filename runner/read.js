@@ -1,24 +1,28 @@
 import fs from 'node:fs/promises';
-import { join, dirname, extname } from 'node:path';
+import { join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-export default async (test262Path, preludes, runtime, hook) => {
+export const defaultPatchPath = fileURLToPath(new URL('../patches/', import.meta.url));
+
+export default async (test262Path, preludes, runtime, hook, patchPath = process.env.FYI_PATCH_TESTS ?? defaultPatchPath) => {
   const testPath = join(test262Path, 'test');
 
   const alwaysPrelude = runtime + preludes['assert.js'] + preludes['sta.js'];
 
   const tests = [];
-  const scan = async x => {
-    const dir = await fs.readdir(x);
+  const scan = async (x, root, prefix = '') => {
+    const dir = await fs.readdir(x, { withFileTypes: true });
 
     const promises = [];
-    for (const file of dir) {
-      if (file.endsWith('.js')) {
+    for (const entry of dir) {
+      const file = entry.name;
+      if (entry.isFile() && file.endsWith('.js')) {
         if (file.includes('_FIXTURE')) continue;
-        promises.push(read(join(x, file)));
+        promises.push(read(join(x, file), root, prefix));
         continue;
       }
 
-      promises.push(scan(join(x, file)).catch(() => {}));
+      if (entry.isDirectory()) promises.push(scan(join(x, file), root, prefix));
       continue;
     }
 
@@ -26,12 +30,13 @@ export default async (test262Path, preludes, runtime, hook) => {
   };
 
   const done = {};
-  const read = async file => {
+  const read = async (file, root, prefix) => {
     if (done[file]) return;
     done[file] = true;
 
     let contents = await fs.readFile(file, 'utf8');
-    file = file.replace(testPath + '/', '');
+    const sourcePath = resolve(file);
+    file = prefix + relative(root, file).split('\\').join('/');
     if (hook) return hook({ file, contents });
 
     const flags = {};
@@ -65,6 +70,7 @@ export default async (test262Path, preludes, runtime, hook) => {
 
     tests.push({
       file,
+      sourcePath,
       contents,
       flags,
       negative,
@@ -72,6 +78,16 @@ export default async (test262Path, preludes, runtime, hook) => {
     });
   };
 
-  await scan(testPath);
+  await scan(testPath, testPath);
+  if (patchPath) {
+    try {
+      await fs.stat(patchPath);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      if (process.env.FYI_PATCH_TESTS) throw error;
+      return tests;
+    }
+    await scan(patchPath, patchPath, 'patches/');
+  }
   return tests;
 };
