@@ -34,7 +34,7 @@ assert.sameValue((1).clamp(0, NaN), NaN, "");
 
 assert.sameValue((1).clamp(2, 2), 2, "");
 
-assert.sameValue((-0).clamp(-0, 2), 0, "");
+assert.sameValue((-0).clamp(-0, 2), -0, "");
 assert.sameValue((0).clamp(-0, 2), 0, "");
 
 assert.sameValue((-1).clamp(0, 2), 0, "");

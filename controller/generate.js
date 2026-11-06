@@ -134,6 +134,12 @@ const generate = async () => {
 
   const testsWithFeatures = {};
   await read('test262', {}, '', ({ file, contents }) => {
+    if (file.startsWith('patches/')) {
+      const sourceFile = join(dataDir, file);
+      mkdirSync(dirname(sourceFile), { recursive: true });
+      writeFileSync(sourceFile, contents);
+    }
+
     const inline = contents.match(/^features: \[(.*)\]$/m)?.[1];
     const features = inline !== undefined ? inline.split(',') :
       (contents.match(/^features:\r?\n((?:  - .*\r?\n)+)/m)?.[1] ?? '')
